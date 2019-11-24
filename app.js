@@ -2,8 +2,11 @@ var fs = require('fs');
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var multer = require('multer');
+var client = require("./mysql.js").mysql_pool;
 var user_insert = require('./user_insert.js');
 var login = require('./login.js');
+var ejs = require('ejs');
 
 var app = express();
 app.use(cookieParser());
@@ -17,16 +20,15 @@ app.get('/', function(req,res){
         res.end(data, 'utf-8');
     });
 });
-
 app.get('/main', function(req,res){
     res.writeHead(200,{'Content-Type':'text/html'});
-    fs.readFile('./main.html', function(err, data){
+    fs.readFile('./main.html', 'utf8',function(err, data){
         if(err) throw err;
-        res.end(data,'utf-8');
+        client.query('select * from restaurant', function(err, result){
+            res.end(ejs.render(data,{result:result}));
+        });
     });
 });
-app.post('/login', login.login);
-
 app.get('/sign', function(req, res){
     res.writeHead(200, {'Content-Type':'text/html'});
     fs.readFile('./sign.html', function(err, data){
@@ -41,8 +43,40 @@ app.get('/sign_complete', function(req,res){
         res.end(data, 'utf-8');
     });
 });
-
+app.post('/login', login.login);
 app.post('/user_insert', user_insert.insert);
+
+
+
+var upload = multer({dest:'uploads/'});
+app.use('/upload', express.static('uploads'));
+app.get('/filepage', function(req,res){
+    var path = __dirname + 'uploads';
+    res.writeHead(200, {'Content-Type':'text/html'});
+    fs.readFile('./filepage.html', function(err,data){
+        res.end(data);
+        });
+});
+
+app.post('/upload_images', upload.single('image'), function(req, res){
+    let file = req.file;
+    let result = {
+        filename:file.filename
+    };
+    let name = req.body.name;
+    let minprice = req.body.minprice;
+    let callnum = req.body.callnum;
+    let image = '/image/' + result.filename;
+    let sql = 'insert into restaurant values (null, ?, ?, ?, ?)';
+    let params = [name, minprice, callnum, image]
+    client.query(sql, params, function(err, result){
+        if(err){
+            console.log(err);
+        }
+        console.log(result);
+        res.redirect('/main');
+    });
+});
 
 app.listen(3000, function(){
     console.log("Surver Running at port : 3000");

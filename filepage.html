@@ -1,0 +1,32 @@
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <form action="http://127.0.0.1:3000/upload_images" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="ExFileUpload">File Upload</label>
+                <table>
+                    <tr>
+                        <td><input type="text" id="name" name="name" placeholder="Name"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="minprice" name="minprice" placeholder="MinPrice"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="callnum" name="callnum" placeholder="Callnum"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="file" class="form-control-file" id="image" name="image" accept="image/*"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="submit" value="제출">
+        </form>
+    </div>
+</body>
+</html>
