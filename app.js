@@ -67,14 +67,14 @@ app.post('/upload_images', upload.single('image'), function(req, res){
     let minprice = req.body.minprice;
     let callnum = req.body.callnum;
     let image = '/image/' + result.filename;
-    let sql = 'insert into restaurant values (null, ?, ?, ?, ?)';
-    let params = [name, minprice, callnum, image]
+    let group = req.body.group;
+    let sql = 'insert into restaurant values (null, ?, ?, ?, ?, ?)';
+    let params = [name, minprice, callnum, image, group]
     client.query(sql, params, function(err, result){
         if(err){
             console.log(err);
         }
-        console.log(result);
-        res.redirect('/main');
+        res.redirect('/filepage');
     });
 });
 
