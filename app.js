@@ -48,8 +48,8 @@ app.post('/user_insert', user_insert.insert);
 
 
 
-var upload = multer({dest:'uploads/'});
-app.use('/upload', express.static('uploads'));
+var upload = multer({dest:'./uploads'});
+app.use('/image', express.static('./uploads'));
 app.get('/filepage', function(req,res){
     var path = __dirname + 'uploads';
     res.writeHead(200, {'Content-Type':'text/html'});
