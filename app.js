@@ -50,14 +50,16 @@ app.post('/user_insert', user_insert.insert);
 
 var upload = multer({dest:'./uploads'});
 app.use('/image', express.static('./uploads'));
+
+// 
 app.get('/filepage', function(req,res){
-    var path = __dirname + 'uploads';
+    //var path = __dirname + 'uploads';
     res.writeHead(200, {'Content-Type':'text/html'});
     fs.readFile('./filepage.html', function(err,data){
         res.end(data);
         });
 });
-
+// 
 app.post('/upload_images', upload.single('image'), function(req, res){
     let file = req.file;
     let result = {
@@ -75,6 +77,16 @@ app.post('/upload_images', upload.single('image'), function(req, res){
             console.log(err);
         }
         res.redirect('/filepage');
+    });
+});
+
+app.use('/main', express.static(__dirname));
+app.get('/main/:id', function(req,res){
+    fs.readFile('menu.html', 'utf-8', function(err, data){
+        let sql = 'SELECT r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.set_price FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?'
+        client.query(sql, [req.params.id], function(err, result){
+            res.send(ejs.render(data,{result:result}));
+        });
     });
 });
 
