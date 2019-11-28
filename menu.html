@@ -49,7 +49,7 @@
         left: 0;
         right: 0;
       }
-      #t_body_img, .t_body_h, .t_body_p {
+      #t_body_img {
         float:left;
       }
       #t_body_img{
@@ -166,19 +166,32 @@
                     </tr>
                   </thead>
                   <tbody id="btn">
-                  <%
-                    for(var i=0; i<result.length; i++) {
-                  %>
-                    <tr style="cursor:pointer;">
-                      <td>
-                        <img src="<%=result[i].image%>" id="t_body_img">
-                        <p class="text-center" id="t_body_p" align="left"><%=result[i].m_name%></p>
-                        <p class="text-center" id="t_body_p" align="left"><%=result[i].minprice%>원</p>
-                      </td>
-                    </tr>
-                  <%
-                    }
-                  %>
+                    <%
+                      for(var j=0; j<result.length; j++){
+                    %>
+                      <tr>
+                        <td style="text-align:left; vertical-align:middle">
+                          <%=result[j].title%>
+                        </td>
+                      </tr>
+                        <%
+                          for(var i=0; i<result2.length; i++) {
+                        %>
+                          <%if(result[j].title==result2[i].title){%>
+                              <tr style="cursor:pointer;">
+                                <td>
+                                  <img src="<%=result2[i].image%>" id="t_body_img">
+                                  <p class="text-center" id="t_body_p" align="left"><%=result2[i].m_name%></p>
+                                  <p class="text-center" id="t_body_p" align="left"><%=result2[i].minprice%>원</p>
+                                </td>
+                              </tr>
+                          <%}%>
+                        <%
+                          }
+                        %>
+                    <%
+                      }
+                    %>
                   </tbody>
                 </table>
           </article>

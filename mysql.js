@@ -5,7 +5,8 @@ var mysqldb = {
         user     : 'root',
         password : 'nmh147852',
         database : 'TERMPROJECT',
-        port : 3306
+        port : 3306,
+        multipleStatements:true
     })
 };
 module.exports = mysqldb;
