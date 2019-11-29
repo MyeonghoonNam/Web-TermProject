@@ -10,6 +10,10 @@ exports.login = function(req,res,next){
             if(rows[0] != undefined){
                 console.log('Login Success');
                 res.cookie("auth",true);
+                res.cookie("userinfo", {
+                    userid:id,
+                    userpassword:password
+                });
                 res.redirect('/main');
             }
         } else{

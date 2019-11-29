@@ -20,7 +20,7 @@
       section{
         padding-top: 30px;
       }
-      article{
+      .article_menu{
         width:48%;
         float:left;
         position: relative;
@@ -28,6 +28,7 @@
         margin: 0;
         padding-bottom: 10%;
         margin-bottom:0px;
+        margin-left:7%;
       }
       html {
         position: relative;
@@ -62,35 +63,30 @@
         margin-bottom:0px;
         
       }
-      .OrderFixed {
-        position: fixed;
-        top: 0px;
+      #m_title{
+        background-color: rgb(214, 214, 214);
       }
       .orderlist{
-        margin-left: 15px;
+        top:50px;
+        float:left;
+        width:30%;
+        margin-left:10%;
       }
+      
       .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
             left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            top: 50px;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+
         }
-    
-        /* Modal Content/Box */
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 40%; /* Could be more or less, depending on screen size */                          
-        }
-        /* The Close Button */
+        
         .close {
             color: #aaa;
             float: right;
@@ -103,6 +99,7 @@
             text-decoration: none;
             cursor: pointer;
         }
+        
 
   </style>
 </head>
@@ -118,16 +115,10 @@
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="#page-top">Home</a>
+            <a class="nav-link js-scroll-trigger" style="cursor:default"><%=usercookie.userid%></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="#about">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="#services">Services</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+            <a class="nav-link js-scroll-trigger" href="http://127.0.0.1:3000/logout">Logout</a>
           </li>
         </ul>
       </div>
@@ -143,21 +134,7 @@
     </header>
 
     <section>
-      <div>
-          <article class="orderlist">
-            <div style="border: 2px solid black">
-              <h1>Hi!</h1>
-            </div>
-          </article>
-        </div>
-      <div>
-        <article class="orderlist">
-          <div style="border: 2px solid black">
-            <h1>Hi!</h1>
-          </div>
-        </article>
-      </div>
-      <div>
+      
           <article class="article_menu">
               <table class="table table-sm table-hover">
                   <thead class="thead-light">
@@ -165,24 +142,24 @@
                       <th colspan="3"><h3>Menu</h3></th>
                     </tr>
                   </thead>
-                  <tbody id="btn">
+                  <tbody id="tbody1">
                     <%
                       for(var j=0; j<result.length; j++){
                     %>
                       <tr>
-                        <td style="text-align:left; vertical-align:middle">
-                          <%=result[j].title%>
+                        <td style="text-align:left; vertical-align:middle" id="m_title">
+                          <strong><%=result[j].title%></strong>
                         </td>
                       </tr>
                         <%
                           for(var i=0; i<result2.length; i++) {
                         %>
                           <%if(result[j].title==result2[i].title){%>
-                              <tr style="cursor:pointer;">
-                                <td>
+                              <tr style="cursor:pointer;" class="list" onclick="PopupEmpInfo(this)">
+                                <td id="btn">
                                   <img src="<%=result2[i].image%>" id="t_body_img">
-                                  <p class="text-center" id="t_body_p" align="left"><%=result2[i].m_name%></p>
-                                  <p class="text-center" id="t_body_p" align="left"><%=result2[i].minprice%>원</p>
+                                  <p class="text-center" id="t_body_p"><%=result2[i].m_name%></p>
+                                  <p class="text-center" id="t_body_p"><%=result2[i].price%>원</p>
                                 </td>
                               </tr>
                           <%}%>
@@ -195,7 +172,26 @@
                   </tbody>
                 </table>
           </article>
-        </div>
+        <article class="orderlist">
+            <table class="orderlist-area-table table table-sm">
+              <thead>
+                <tr>
+                  <th>주문표</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>싸이버거</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>주문하기</td>
+                </tr>
+              </tfoot>
+            </table>
+        </article>
+        
     </section>
     <!-- Footer -->
     <footer class="py-5 bg-dark">
@@ -206,14 +202,32 @@
     </footer>
 
     <!-- Modal : order -->
-    <div id="myModal" class="modal">
-        <!-- Modal content -->
-        <div class="modal-content">
-          <span class="close" align="right">&times;</span>                                                               
-          <p align="center">Some text in the Modal..</p>
+    <form action="http://127.0.0.1:3000/insert_orderlist" method="post" id="form_add_orderlist">
+      <div class="modal" tabindex="-1" role="dialog" id="myModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Menu</h5>
+              <span class='close'>&times;</span>
+            </div>
+            <div class="modal-body">
+              <table>
+                <tbody>
+                  <tr>
+                    <td id="modal_body_name"></td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td id="modal_body_price"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="add_orderlist">주문표에 추가</button>
+            </div>
+          </div>
         </div>
       </div>
-
+    </form>
   <!-- Bootstrap core JavaScript -->
   <script src="template/vendor/jquery/jquery.min.js"></script>
   <script src="template/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -224,24 +238,23 @@
   <!-- Custom JavaScript for this theme -->
   <script src="template/js/scrolling-nav.js"></script>
   <script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
-  <script>
-    var modal = document.getElementById('myModal');
- 
-    // Get the button that opens the modal
-    var btn = document.getElementById("btn");
+  <script>                                     
+    function PopupEmpInfo(clicked_element) {
+      var row_td = clicked_element.getElementsByTagName("p");
+      var modal = document.getElementById("myModal");
 
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];                                          
+      document.getElementById("modal_body_name").innerHTML = row_td[0].innerHTML;
+      document.getElementById("modal_body_price").innerHTML = row_td[1].innerHTML;
 
-    // When the user clicks on the button, open the modal 
-    btn.onclick = function() {
-        modal.style.display = "block";
+      $(document.body).delegate('#btn', 'click', function() {
+        modal.style.display = "block";  
+      });
+
+      // 주문표에 추가 클릭시 창 alert 보이게 그 전에 특정값에 값 전송.
+      $(document.body).delegate('.close', 'click', function() {
+        modal.style.display = "none";  
+      });
     }
-
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }  
   </script>
 </body>
 </html>
