@@ -50,11 +50,15 @@ app.get('/main/:id', function(req,res){
     let UserCookie = req.cookies.userinfo;
     if(Cookie){
         fs.readFile('menu.html', 'utf-8', function(err, data){
-            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?'
+            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT name, price FROM orderlist;';
             client.query(sql, [req.params.id], function(err, result){
+                console.log(result[0]);
+                console.log(result[1]);
+                console.log(result[2]);
                 res.send(ejs.render(data,{
                     result:result[0],
                     result2:result[1],
+                    result3:result[2],
                     usercookie:UserCookie
                 }));
             });
@@ -82,14 +86,14 @@ app.get('/sign_complete', function(req,res){
 app.post('/login', login.login);
 app.post('/user_insert', user_insert.insert);
 app.post('/insert_orderlist', function(req,res){
-    let name = req.body.modal_body_name;
-    let price = req.body.modal_body_price;
+    let name = req.body.h_name;
+    let price = req.body.h_price;
 
     client.query('insert into orderlist (name, price) values (?, ?)',[name, price], function(err, result){
         
         console.log(result);
         if(err) throw err;
-        req.get('referer');
+        res.redirect(req.get('referer'));
     });
 })
 
