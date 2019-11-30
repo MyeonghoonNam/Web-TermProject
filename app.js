@@ -50,11 +50,8 @@ app.get('/main/:id', function(req,res){
     let UserCookie = req.cookies.userinfo;
     if(Cookie){
         fs.readFile('menu.html', 'utf-8', function(err, data){
-            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT name, price FROM orderlist;';
+            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT * FROM orderlist;';
             client.query(sql, [req.params.id], function(err, result){
-                console.log(result[0]);
-                console.log(result[1]);
-                console.log(result[2]);
                 res.send(ejs.render(data,{
                     result:result[0],
                     result2:result[1],
@@ -83,20 +80,42 @@ app.get('/sign_complete', function(req,res){
     });
 });
 
+app.use('/order', express.static(__dirname));
+app.get('/order/check', function(req,res){
+    let Cookie = req.cookies.auth;
+    let UserCookie = req.cookies.userinfo;
+    if(Cookie){
+        fs.readFile('./order.html', 'utf-8',function(err,data){
+            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid';
+            client.query(sql, function(err,result){
+                res.send(ejs.render(data, {
+                    result:result,
+                    usercookie:UserCookie
+                }));
+            });
+        });
+    }
+});
 app.post('/login', login.login);
 app.post('/user_insert', user_insert.insert);
 app.post('/insert_orderlist', function(req,res){
+    let orderid = req.cookies.userinfo.userid;
     let name = req.body.h_name;
     let price = req.body.h_price;
+    let quantity = req.body.modal_body_quantity
 
-    client.query('insert into orderlist (name, price) values (?, ?)',[name, price], function(err, result){
-        
-        console.log(result);
+    client.query('insert into orderlist (orderid, mname, price, quantity) values (?, ?, ?, ?)',[orderid, name, price, quantity], function(err, result){
         if(err) throw err;
         res.redirect(req.get('referer'));
     });
 })
 
+app.post('/delete_orderlist_right/:id', function(req,res){
+    client.query('delete from orderlist where id=?', [req.params.id], function(err, result){
+        if(err) throw err;
+        res.redirect(req.get('referer'));
+    });
+});
 
 
 

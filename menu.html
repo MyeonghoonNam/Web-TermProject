@@ -99,8 +99,11 @@
             text-decoration: none;
             cursor: pointer;
         }
+        .text-left {
+          float:left;
+          width:55%;
+        }
         
-
   </style>
 </head>
 
@@ -133,7 +136,7 @@
       </div>
     </header>
 
-    <section>
+    <section id="main">
       
           <article class="article_menu">
               <table class="table table-sm table-hover">
@@ -172,36 +175,41 @@
                   </tbody>
                 </table>
           </article>
-        <article class="orderlist">
-            <table class="orderlist-area-table table table-sm">
-              <thead class="thead-light">
-                <tr>
-                  <th><h3>주문표</h3></th>
-                </tr>
-              </thead>
-              <tbody>
-               
-                <% 
-                  for(var n=0; n<result3.length; n++) {
-                %>  
+          <article class="orderlist">
+              <table class="orderlist-area-table table table-sm">
+                <thead class="thead-light">
                   <tr>
-                    <td>
-                      <p class="text-center"><%=result3[n].name%></p>
-                      <p class="text-center"><%=result3[n].price%>원</p>
-                    </td>
+                    <th>
+                      <h3 style="float:left; width:60%;">주문표</h3>
+                    </th>
                   </tr>
-                <%
-                  }
-                %>
+                </thead>
+                <tbody>
                 
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td>주문하기</td>
-                </tr>
-              </tfoot>
-            </table>
-        </article>
+                  <% 
+                    for(var n=0; n<result3.length; n++) {
+                  %>
+                  <form action="http://127.0.0.1:3000/delete_orderlist_right/<%=result3[n].id%>" method="post" id="orderlist_right" name="orderlist_right">
+                    <tr>
+                      <td>
+                        <p class="text-left" style="width:100%; font-size:15pt" id="orname" name="orname"><%=result3[n].mname%></p>
+                        <p class="text-left" style="width:80px; font-size:15pt" id="orprice" name="orprice"><%=result3[n].price%></p>
+                        <button type="button" class="delete" id="delete" style="float:right; width:30px; text-align:center; position:relative; top:5px;">X</button>
+                        <p class="text-left" style="width:90px; font-size:15pt; float:right; ">수량 : <%=result3[n].quantity%>개</p>
+                      </td>
+                    </tr>
+                  <%
+                    }
+                  %>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td><button type="button" class="btn btn-primary" style="float:right;" onClick="location.href='http://127.0.0.1:3000/order/check'">주문하기</button></td>
+                  </tr>
+                </tfoot>
+              </table>
+                </form>
+          </article>
         
     </section>
     <!-- Footer -->
@@ -222,17 +230,14 @@
               <span class='close'>&times;</span>
             </div>
             <div class="modal-body">
-              <table>
-                <tbody>
-                  <tr>
-                    <td id="modal_body_name"></td>
-                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                    <td id="modal_body_price"></td>
-                    <input type="hidden" id="h_name" name="h_name" value="">
-                    <input type="hidden" id="h_price" name="h_price" value="">
-                  </tr>
-                </tbody>
-              </table>
+              <p id="modal_body_name" style="width:100%; width:100%; font-size:15pt; float:left"></p>
+              <p id="modal_body_price" style="width:80px; font-size:15pt; float:left;"></p>
+              <button type="button" class="plus" style="float:right; width:30px">+</button>
+              <input type="number" id="modal_body_quantity" name="modal_body_quantity" class="numBox" min="1" max="10" value="1" readonly="readonly" style="float:right; width:40px; text-align:right;"/>
+              <button type="button" class="minus" style="float:right; width:30px">-</button>
+              <input type="hidden" id="h_name" name="h_name" value="">
+              <input type="hidden" id="h_price" name="h_price" value="">
+              
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-primary" id="add_orderlist" onclick="mysubmit()">주문표에 추가</button>
@@ -251,7 +256,8 @@
   <!-- Custom JavaScript for this theme -->
   <script src="template/js/scrolling-nav.js"></script>
   <script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
-  <script>                                     
+  
+  <script>
     function PopupEmpInfo(clicked_element) {
       var row_td = clicked_element.getElementsByTagName("p");
       var modal = document.getElementById("myModal");
@@ -259,11 +265,51 @@
       document.getElementById("modal_body_name").innerHTML = row_td[0].innerHTML;
       document.getElementById("modal_body_price").innerHTML = row_td[1].innerHTML;
 
+      var cs_data = document.getElementById("modal_body_price").innerHTML;
+
+      $(".plus").click(function(){
+      let num = $(".numBox").val();
+      let plusNum = Number(num);
+      let i_data;
+      let sum;
+      i_data = cs_data.replace(",","");
+      i_data = parseInt(i_data);
+      
+        if(plusNum >= 10) {
+          alert('최대 주문 수량은 메뉴당 10개 입니다.')
+          $(".numBox").val(num);
+          document.getElementById("modal_body_price").innerHTML = cs_data;
+        } else {
+          plusNum += 1;
+          $(".numBox").val(plusNum);
+          sum = i_data*plusNum;
+          document.getElementById("modal_body_price").innerHTML = sum+"원";
+        }
+      });
+      $(".minus").click(function(){
+      let num = $(".numBox").val();
+      let minusNum = Number(num);
+      let i_data;
+      let sum;
+      i_data = cs_data.replace(",","");
+      i_data = parseInt(i_data);
+        
+        if(minusNum <= 1) {
+          alert("최소 주문 수량은 메뉴당 1개 입니다.")
+          $(".numBox").val(num);
+          document.getElementById("modal_body_price").innerHTML = cs_data;
+        } else {
+          minusNum -= 1;
+          $(".numBox").val(minusNum);
+          sum = i_data*minusNum;
+          document.getElementById("modal_body_price").innerHTML = sum+"원";          
+        }
+      });
+
       $(document.body).delegate('#btn', 'click', function() {
         modal.style.display = "block";  
       });
 
-      // 주문표에 추가 클릭시 창 alert 보이게 그 전에 특정값에 값 전송.
       $(document.body).delegate('.close', 'click', function() {
         modal.style.display = "none";  
       });
@@ -273,7 +319,13 @@
       form_add_orderlist.h_price.value = document.getElementById("modal_body_price").innerHTML;
 
       document.form_add_orderlist.submit();
-    }
+    };
+
+    $('.delete').click(function(){
+      $('#orderlist_right').submit();
+    })
   </script>
+
+  
 </body>
 </html>
