@@ -8,7 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Scrolling Nav - Start Bootstrap Template</title>
+  <title>TermProject</title>
 
   <!-- Bootstrap core CSS -->
   <link href="template/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@
         position: relative;
         min-height: 100%;
         margin: 0;
-        padding-bottom: 10%;
+        padding-bottom: 15%;
         margin-bottom:0px;
         margin-left:7%;
       }
@@ -103,43 +103,71 @@
           float:left;
           width:55%;
         }
-        
+        .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+    .dropdown-menu a:hover {background-color: #ddd;}
+    .dropdown:hover .dropdown-menu {display: block;}
+    .dropdown-menu a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }  
   </style>
 </head>
 
 <body id="page-top">
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-    <div class="container">
-      <a class="navbar-brand js-scroll-trigger" href="#page-top">Start Bootstrap</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" style="cursor:default"><%=usercookie.userid%></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="http://127.0.0.1:3000/logout">Logout</a>
-          </li>
-        </ul>
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">WebServies</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <div class="dropdown">
+              <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <%=usercookie.userid%>
+              </a>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  <a class="dropdown-item" href="http://127.0.0.1:3000/main">Home</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="http://127.0.0.1:3000/review/main">Review</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="http://127.0.0.1:3000/logout">Logout</a>
+                </div>
+            </div>
+          </ul>
+        </div>
       </div>
-    </div>
-  </nav>
-
+    </nav>
   
-    <header class="bg-primary text-white">
+    <header class="bg-primary text-white" >
       <div class="container text-center">
-        <h1>Welcome to Scrolling Nav</h1>
-        <p class="lead">A landing page template freshly redesigned for Bootstrap 4</p>
+        <h1>Welcome to My WebServies</h1>
+        <p class="lead">Second semester of 2019 Web Programming Term Project</p>
+      </div>
+      <div id="input-form" style="margin-bottom:0; margin-left:43%">
+          <input type="text" id="keyword" autocomplete="off" placeholder="(Search)">
       </div>
     </header>
 
     <section id="main">
       
           <article class="article_menu">
-              <table class="table table-sm table-hover">
+              <table class="table table-sm table-hover" id="user-table">
                   <thead class="thead-light">
                     <tr>
                       <th><h3>Menu</h3></th>
@@ -203,6 +231,11 @@
                   %>
                 </tbody>
                 <tfoot>
+                  <tr>
+                    <td colspan="2">
+                      <p style="float:right; margin-bottom:0" >최소 주문 가격 : <%=result2[0].minprice%>원</p>
+                    </td>
+                  </tr>
                   <tr>
                     <td><button type="button" class="btn btn-primary" style="float:right;" onClick="location.href='http://127.0.0.1:3000/order/check'">주문하기</button></td>
                   </tr>
@@ -325,7 +358,17 @@
       $('#orderlist_right').submit();
     })
   </script>
-
+  <script>
+      $(document).ready(function() {
+              $("#keyword").keyup(function() {
+                  var k = $(this).val();
+                  $("#user-table > tbody > tr").hide();
+                  var temp = $("#user-table > tbody > tr > td:nth-child(5n+1):contains('" + k + "')");
+  
+                  $(temp).parent().show();
+              })
+          })
+    </script>
   
 </body>
 </html>

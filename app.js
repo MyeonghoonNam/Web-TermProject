@@ -62,7 +62,7 @@ app.get('/main/:id', function(req,res){
  
     if(Cookie){
         fs.readFile('menu.html', 'utf-8', function(err, data){
-            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.id, r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT * FROM orderlist WHERE orderid = ?;';
+            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.id, r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT * FROM orderlist WHERE orderid = ? AND isOrdered = 1;';
             client.query(sql, [req.params.id, req.cookies.userinfo.userid], function(err, result){
                 res.send(ejs.render(data,{
                     result:result[0],
@@ -98,7 +98,7 @@ app.get('/order/check', function(req,res){
     let UserCookie = req.cookies.userinfo;
     if(Cookie){
         fs.readFile('./order.html', 'utf-8',function(err,data){
-            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid WHERE u.id=?';
+            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid WHERE u.id=? AND o.isOrdered = 1;';
             client.query(sql, [UserCookie.userid], function(err,result){
                 res.send(ejs.render(data, {
                     result:result,
@@ -113,7 +113,7 @@ app.get('/order/success', function(req,res){
     let UserCookie = req.cookies.userinfo;
     if(Cookie){
         fs.readFile('./orderfinal.html', 'utf-8',function(err,data){
-            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid WHERE u.id=?';
+            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid WHERE u.id=? AND o.isOrdered=1;';
             client.query(sql, [UserCookie.userid], function(err,result){
                 res.send(ejs.render(data, {
                     result:result,
@@ -123,9 +123,26 @@ app.get('/order/success', function(req,res){
         });
     }
 })
+
+app.use('/review', express.static(__dirname));
+app.get('/review/main', function(req,res){
+    let Cookie = req.cookies.auth;
+    let UserCookie = req.cookies.userinfo;
+    if(Cookie){
+        fs.readFile('./review.html', 'utf-8',function(err,data){
+            let sql = "select * from review ORDER BY ssid DESC";
+                client.query(sql, function(err,result){
+                    res.send(ejs.render(data,{
+                        result:result,
+                        usercookie:UserCookie
+                    }));
+                })
+        });
+    }
+})
 app.post('/orderadrinsert', function(req,res){
     let address = req.body.address;
-    let sql = "UPDATE orderlist SET address=? WHERE orderid IN (SELECT id FROM user WHERE id=?);"
+    let sql = "UPDATE orderlist SET address=? WHERE orderid IN (SELECT id FROM user WHERE id=?) AND isOrdered=1;"
     client.query(sql, [address, req.cookies.userinfo.userid], function(err,result){
         res.redirect('/order/success');
     });
@@ -162,8 +179,52 @@ app.post('/delete_owner_orderlist/:id', function(req,res){
     });
 });
 
+app.post('/delete_total_owner_orderlist', function(req,res){
+    let sql = 'delete from orderlist;';
+    client.query(sql, [req.params.id], function(err, result){
+        if(err) throw err;
+        res.redirect('/main');
+    });
+});
 
+app.get('/review/create', function(req,res){
+    let Cookie = req.cookies.auth;
+    let UserCookie = req.cookies.userinfo;
+    if(Cookie){
+        fs.readFile('./reviewC.html', 'utf-8',function(err,data){
+           res.send(ejs.render(data,{
+                usercookie:UserCookie
+           }));
+        });
+    }
+})
+app.post('/reviewCreate', function(req,res){
+    let author = req.cookies.userinfo.userid;
+    let title = req.body.title;
+    let body = req.body.body;
+    let currentDate = req.body.currentDate;
+    let sql = "INSERT INTO review VALUES(NULL, ?, ?, ?, ?);";
+    client.query(sql, [author, title, body, currentDate], function(err,result){
+        if(err) throw err;
+        res.redirect('/review/main');
+    });
+});
 
+app.get('/review/:id', function(req,res){
+        let Cookie = req.cookies.auth;
+        let UserCookie = req.cookies.userinfo;
+        let sql = "SELECT * FROM review WHERE ssid = ?";
+        if(Cookie){
+            fs.readFile('./reviewcheck.html', 'utf-8', function(err,data){
+                client.query(sql, [req.params.id], function(err,result){
+                    res.send(ejs.render(data,{
+                        result:result,
+                        usercookie:UserCookie
+                    }));
+                });
+            });
+        };
+});
 
 var upload = multer({dest:'./uploads'});
 app.use('/image', express.static('./uploads'));

@@ -15,6 +15,8 @@ exports.login = function(req,res,next){
                     usertype:rows[0].utype
                 });
                 res.redirect('/main');
+            }else{
+                res.redirect('/main');
             }
         } else{
             res.redirect('/'/*req.get('referer')*/);
