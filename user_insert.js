@@ -5,9 +5,10 @@ exports.insert = function(req,res){
   var password = req.body.password;
   var name = req.body.name;
   var phone = req.body.phone;
+  var utype = req.body.utype;
 
 
-  client.query('insert into user (id, password, name, phone) values (?, ?, ?, ?)',[id, password, name, phone], function(err, result){
+  client.query('insert into user (id, password, name, phone, utype) values (?, ?, ?, ?, ?)',[id, password, name, phone, utype], function(err, result){
     if(err){
       res.json({code:500});
       console.log(err)

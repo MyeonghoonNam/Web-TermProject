@@ -109,8 +109,8 @@
       </div>
     </header>
 
-    <section id="main">
-        <form action="http://127.0.0.1:3000/orderfinal" method="post" id="orderlist_left" name="orderlist_left">
+    <section>
+        <form method="post" action="http://127.0.0.1:3000/orderadrinsert" id="orderlist_left">
           <article class="article_menu">
               <table class="table table-sm">
                   <thead class="thead-light">
@@ -129,13 +129,12 @@
                         </tr>
                         <tr>
                           <td><label style="float:right">주소</label></td>
-                          <td><input type="text" name="addrees" autocomplete="off" placeholder="(필수)" style="margin-left:20px"></td>
+                          <td><input type="text" id="address" name="address" autocomplete="off" placeholder="(필수)" style="margin-left:20px"></td>
                         </tr>
                   </tbody>
                 </table>
             </article>
-        </form>
-          <article class="orderlist">
+          <article class="orderlist" style="padding-bottom: 10%">
               <table class="orderlist-area-table table table-sm">
                 <thead class="thead-light">
                   <tr>
@@ -161,10 +160,11 @@
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td><button type="button" class="btn btn-primary" style="float:right;">주문완료</button></td>
+                    <td><button type="submit" class="btn btn-primary" style="float:right;" id="orderbtn" name="orderbtn">주문완료</button></td>
                   </tr>
                 </tfoot>
               </table>
+            </form>
           </article>
         
     </section>
@@ -186,5 +186,12 @@
   <!-- Custom JavaScript for this theme -->
   <script src="template/js/scrolling-nav.js"></script>
   <script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+
+  <script>
+    $('#orderbtn').click(function(){
+      $('#orderlist_left').submit();
+    })
+    
+  </script>
 </body>
 </html>

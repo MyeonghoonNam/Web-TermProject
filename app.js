@@ -28,12 +28,23 @@ app.get('/logout', function(req,res){
 app.get('/main', function(req,res){
     let Cookie = req.cookies.auth;
     let UserCookie = req.cookies.userinfo;
-    if(Cookie){
+
+    if(Cookie && UserCookie.usertype=="customer"){
         res.writeHead(200,{'Content-Type':'text/html'});
         fs.readFile('./main.html', 'utf8', function(err, data){
             if(err) throw err;
             client.query('select * from restaurant', function(err, result){
                 res.end(ejs.render(data,{
+                    result:result,
+                    usercookie:UserCookie
+                }));
+            });
+        });
+    } else if(Cookie && UserCookie.usertype=="owner"){
+        fs.readFile('./owner.html', 'utf-8',function(err,data){
+            let sql = 'SELECT u.id, u.name, u.phone, o.ssid, o.address, o.mname, o.price, o.quantity, o.orderid FROM user AS u JOIN orderlist AS o ON u.id=o.orderid AND o.isOrdered=1;';
+            client.query(sql, function(err,result){
+                res.send(ejs.render(data, {
                     result:result,
                     usercookie:UserCookie
                 }));
@@ -48,10 +59,11 @@ app.use('/main', express.static(__dirname));
 app.get('/main/:id', function(req,res){
     let Cookie = req.cookies.auth;
     let UserCookie = req.cookies.userinfo;
+ 
     if(Cookie){
         fs.readFile('menu.html', 'utf-8', function(err, data){
-            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT * FROM orderlist;';
-            client.query(sql, [req.params.id], function(err, result){
+            let sql = 'SELECT title, COUNT(title) AS cnt FROM menu GROUP BY title;' + 'SELECT r.id, r.name, r.minprice, r.image, m.m_name, m.title, m.price, m.title FROM restaurant AS r JOIN menu AS m ON r.name = m.r_name WHERE r.id=?;' + 'SELECT * FROM orderlist WHERE orderid = ?;';
+            client.query(sql, [req.params.id, req.cookies.userinfo.userid], function(err, result){
                 res.send(ejs.render(data,{
                     result:result[0],
                     result2:result[1],
@@ -60,7 +72,7 @@ app.get('/main/:id', function(req,res){
                 }));
             });
         });
-    }else{
+    } else{
         res.redirect('/');
     }
 });
@@ -86,8 +98,8 @@ app.get('/order/check', function(req,res){
     let UserCookie = req.cookies.userinfo;
     if(Cookie){
         fs.readFile('./order.html', 'utf-8',function(err,data){
-            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid';
-            client.query(sql, function(err,result){
+            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid WHERE u.id=?';
+            client.query(sql, [UserCookie.userid], function(err,result){
                 res.send(ejs.render(data, {
                     result:result,
                     usercookie:UserCookie
@@ -96,6 +108,29 @@ app.get('/order/check', function(req,res){
         });
     }
 });
+app.get('/order/success', function(req,res){
+    let Cookie = req.cookies.auth;
+    let UserCookie = req.cookies.userinfo;
+    if(Cookie){
+        fs.readFile('./orderfinal.html', 'utf-8',function(err,data){
+            let sql = 'SELECT u.id, u.name, u.phone, o.address, o.mname, o.price, o.quantity FROM user AS u JOIN orderlist AS o ON u.id = o.orderid WHERE u.id=?';
+            client.query(sql, [UserCookie.userid], function(err,result){
+                res.send(ejs.render(data, {
+                    result:result,
+                    usercookie:UserCookie
+                }));
+            });
+        });
+    }
+})
+app.post('/orderadrinsert', function(req,res){
+    let address = req.body.address;
+    let sql = "UPDATE orderlist SET address=? WHERE orderid IN (SELECT id FROM user WHERE id=?);"
+    client.query(sql, [address, req.cookies.userinfo.userid], function(err,result){
+        res.redirect('/order/success');
+    });
+});
+
 app.post('/login', login.login);
 app.post('/user_insert', user_insert.insert);
 app.post('/insert_orderlist', function(req,res){
@@ -103,19 +138,30 @@ app.post('/insert_orderlist', function(req,res){
     let name = req.body.h_name;
     let price = req.body.h_price;
     let quantity = req.body.modal_body_quantity
-
-    client.query('insert into orderlist (orderid, mname, price, quantity) values (?, ?, ?, ?)',[orderid, name, price, quantity], function(err, result){
+    let isOrdered = 1;
+    let sql = 'insert into orderlist (orderid, mname, price, quantity, isOrdered) values (?, ?, ?, ?, ?);';
+    client.query(sql,[orderid, name, price, quantity, isOrdered], function(err, result){
         if(err) throw err;
         res.redirect(req.get('referer'));
     });
 })
 
 app.post('/delete_orderlist_right/:id', function(req,res){
-    client.query('delete from orderlist where id=?', [req.params.id], function(err, result){
+    let sql = 'delete from orderlist WHERE ssid=?;';
+    client.query(sql, [req.params.id], function(err, result){
         if(err) throw err;
         res.redirect(req.get('referer'));
     });
 });
+
+app.post('/delete_owner_orderlist/:id', function(req,res){
+    let sql = 'UPDATE orderlist AS o SET o.isOrdered=0 WHERE ssid=?;';
+    client.query(sql, [req.params.id], function(err, result){
+        if(err) throw err;
+        res.redirect('/main');
+    });
+});
+
 
 
 
